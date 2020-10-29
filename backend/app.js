@@ -22,6 +22,7 @@ app.use(express.json({ limit: "50mb" }));
 app.post("/api/stores", (req, res) => {
   let dbStores = [];
   let stores = req.body;
+  // UNx3kfeMgv8vT5WQ
   stores.forEach((store) => {
     dbStores.push({
       storeName: store.name,
