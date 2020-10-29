@@ -15,11 +15,31 @@ mongoose.connect(
 app.use(express.json({ limit: "50mb" }));
 
 app.post("/api/stores", (req, res) => {
-  let dbStores = req.body;
+  let dbStores = [];
+  let stores = req.body;
+  stores.forEach((store) => {
+    dbStores.push({
+      storeName: store.name,
+      phoneNumber: store.phoneNumber,
+      address: store.address,
+      openStatusText: openStatusText,
+      addressLines: store.addressLines,
+      location: {
+        type: "Point",
+        coordinates: [store.coordinates.longitude, store.coordinates.latitude]
+      }
+    });
+  });
   res.send();
 });
 
 app.get("/", (req, res) => res.send("Hello World"));
+
+app.delete("/api/stores", (req, res) => {
+  Store.deleteMany({}, (err) => {
+    res.status(200).send(err);
+  });
+});
 
 app.listen(port, () =>
   console.log(`Example app listening at http://localhost:${port}`)
