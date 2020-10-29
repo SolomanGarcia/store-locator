@@ -1,4 +1,5 @@
 var map;
+var infoWindow;
 
 function initMap() {
   let losAngeles = { lat: 34.06338, lng: -118.35808 };
@@ -6,8 +7,8 @@ function initMap() {
     center: losAngeles,
     zoom: 8
   });
+  infoWindow = new google.maps.InfoWindow();
   getStores();
-  createMarker();
 }
 
 const getStores = () => {
@@ -34,15 +35,55 @@ const searchLocationsNear = (stores) => {
     );
     let name = store.storeName;
     let address = store.addressLines[0];
+    let phone = store.phoneNumber;
+    let openStatusText = store.openStatusText;
     bounds.extend(latlng);
-    createMarker(latlng, name, address);
+    createMarker(latlng, name, address, phone, openStatusText, index + 1);
   });
   map.fitBounds(bounds);
 };
 
-const createMarker = (latlng, name, address) => {
+const createMarker = (
+  latlng,
+  name,
+  address,
+  phone,
+  openStatusText,
+  storeNumber
+) => {
+  let html = `
+    <div class="store-info-window">
+      <div class="store-info-name">
+        ${name}
+      </div>
+      <div class="store-info-open-status">
+        ${openStatusText}
+      </div>
+      <div class="store-info-address">
+        <div class="icon">
+          <i class="fas fa-location-arrow"></i>
+        </div>
+        <span>
+          ${address}
+        </span>
+      </div>
+      <div class="store-info-phone">
+      <div class="icon">
+        <i class="fas fa-phone-alt"></i>
+      </div>
+        <span>
+          <a href="tel:${phone}">${phone}</a>
+        </span>
+      </div>
+    </div>
+  `;
   var marker = new google.maps.Marker({
     position: latlng,
-    map: map
+    map: map,
+    label: `${storeNumber}`
+  });
+  google.maps.event.addListener(marker, "click", function () {
+    infoWindow.setContent(html);
+    infoWindow.open(map, marker);
   });
 };
