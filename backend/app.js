@@ -4,6 +4,11 @@ const app = express();
 const port = 3000;
 const Store = require("./api/models/store");
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
+
 mongoose.connect(
   "mongodb+srv://Soloman:@cluster0.v31tf.mongodb.net/<dbname>?retryWrites=true&w=majority",
   {
@@ -45,7 +50,7 @@ app.get("/api/stores", (req, res) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      res.status().send(stores);
+      res.status(200).send(stores);
     }
   });
 });
