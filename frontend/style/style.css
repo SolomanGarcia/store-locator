@@ -6,3 +6,15 @@ body {
 #map {
   height: 100vh;
 }
+
+.title {
+  font-size: 88px;
+  position: absolute;
+  z-index: 10;
+  top: 100px;
+  left: 100px;
+  color: #333333;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-family: sans-serif;
+}
