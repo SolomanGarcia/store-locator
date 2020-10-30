@@ -1,11 +1,9 @@
 const mongoose = require("mongoose");
 
 const storeSchema = mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
   storeName: String,
   phoneNumber: String,
-  address: {},
-  openStatusText: String,
-  addressLines: Array,
   location: {
     type: {
       type: String,
@@ -16,7 +14,10 @@ const storeSchema = mongoose.Schema({
       type: [Number],
       required: true
     }
-  }
+  },
+  address: {},
+  openStatustext: String,
+  addressLines: Array
 });
 
 storeSchema.index({ location: "2dsphere" }, { sparse: true });
