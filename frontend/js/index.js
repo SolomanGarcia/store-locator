@@ -2,6 +2,12 @@ var map;
 var infoWindow;
 var markers = [];
 
+const onEnter = (e) => {
+  if (e.key == "Enter") {
+    getStores();
+  }
+};
+
 function initMap() {
   let losAngeles = { lat: 34.06338, lng: -118.35808 };
   map = new google.maps.Map(document.getElementById("map"), {
@@ -13,8 +19,13 @@ function initMap() {
 }
 
 const getStores = () => {
+  const zipCode = document.getElementById("zip-code").value;
+  if (!zipCode) {
+    return;
+  }
   const API_URL = "http://localhost:3000/api/stores";
-  fetch(API_URL)
+  const fullUrl = `${API_URL}?zip_code=${zipCode}`;
+  fetch(fullUrl)
     .then((response) => {
       if (response.status == 200) {
         return response.json();
@@ -23,6 +34,7 @@ const getStores = () => {
       }
     })
     .then((data) => {
+      clearLocations();
       searchLocationsNear(data);
       setStoresList(data);
       setOnClickListener();
@@ -64,6 +76,14 @@ const setStoresList = (stores) => {
   });
 
   document.querySelector(".stores-list").innerHTML = storesHtml;
+};
+
+const clearLocations = () => {
+  infoWindow.close();
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(null);
+  }
+  markers.length = 0;
 };
 
 const searchLocationsNear = (stores) => {
