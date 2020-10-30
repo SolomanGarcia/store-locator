@@ -1,35 +1,49 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const app = express();
-const axios = require("axios");
-const port = 3000;
+const mongoose = require("mongoose");
 const Store = require("./api/models/store");
-const googleMapsService = require("./api/services/googleMapsService");
-const googleMapsService = new GoogleMapsService();
+const StoreService = require("./api/services/storeService");
+const storeService = new StoreService();
 require("dotenv").config();
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
 
 mongoose.connect(
-  "mongodb+srv://Soloman:UNx3kfeMgv8vT5WQ@cluster0.v31tf.mongodb.net/<dbname>?retryWrites=true&w=majority",
+  "mongodb+srv://nazariy:XewyBmtWgwrTlj4y@cluster0-l2uwx.mongodb.net/test?retryWrites=true&w=majority",
   {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true
+    useCreateIndex: true,
+    useUnifiedTopology: true
   }
 );
 
-app.use(express.json({ limit: "50mb" }));
+app.use(
+  express.json({
+    limit: "50mb"
+  })
+);
+
+app.get("/api/stores", (req, res) => {
+  const zipCode = req.query.zip_code;
+  storeService
+    .getStoresNear(zipCode)
+    .then((stores) => {
+      res.status(200).send(stores);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
 
 app.post("/api/stores", (req, res) => {
+  const stores = req.body.stores;
   let dbStores = [];
-  let stores = req.body;
-
-  stores.forEach((store) => {
+  for (const store of stores) {
     dbStores.push({
+      _id: new mongoose.Types.ObjectId(),
       storeName: store.name,
       phoneNumber: store.phoneNumber,
       address: store.address,
@@ -40,8 +54,7 @@ app.post("/api/stores", (req, res) => {
         coordinates: [store.coordinates.longitude, store.coordinates.latitude]
       }
     });
-  });
-
+  }
   Store.create(dbStores, (err, stores) => {
     if (err) {
       res.status(500).send(err);
@@ -51,44 +64,10 @@ app.post("/api/stores", (req, res) => {
   });
 });
 
-app.get("/api/stores", (req, res) => {
-  const zipCode = req.query.zip_code;
-
-  googleMapsService
-    .getCoordinates(zipCode)
-    .then((coordinates) => {
-      Store.find(
-        {
-          location: {
-            $near: {
-              $maxDistance: 3218,
-              $geometry: {
-                type: "Point",
-                coordinates: coordinates
-              }
-            }
-          }
-        },
-        (err, stores) => {
-          if (err) {
-            res.status(500).send(err);
-          } else {
-            res.status(200).send(stores);
-          }
-        }
-      );
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-});
-
 app.delete("/api/stores", (req, res) => {
-  Store.deleteMany({}, (err) => {
-    res.status(200).send(err);
+  Store.deleteMany({}, (result) => {
+    res.status(200).send(result);
   });
 });
 
-app.listen(port, () =>
-  console.log(`Example app listening at http://localhost:${port}`)
-);
+app.listen(3000, () => console.log("Listening on http://localhost:3000/"));

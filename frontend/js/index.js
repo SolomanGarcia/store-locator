@@ -2,21 +2,48 @@ var map;
 var infoWindow;
 var markers = [];
 
+function initMap() {
+  var losAngeles = { lat: 34.06338, lng: -118.35808 };
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: losAngeles,
+    zoom: 11,
+    mapTypeId: "roadmap"
+  });
+  infoWindow = new google.maps.InfoWindow();
+  getStores();
+}
+
+const clearLocations = () => {
+  infoWindow.close();
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(null);
+  }
+  markers.length = 0;
+};
+
+const noStoresFound = () => {
+  const html = `
+    <div class="no-stores-found">
+      No Stores Found
+    </div>
+  `;
+  document.querySelector(".stores-list").innerHTML = html;
+};
+
+const setOnClickListener = () => {
+  let storeElements = document.querySelectorAll(".store-container");
+  storeElements.forEach((elem, index) => {
+    elem.addEventListener("click", () => {
+      google.maps.event.trigger(markers[index], "click");
+    });
+  });
+};
+
 const onEnter = (e) => {
   if (e.key == "Enter") {
     getStores();
   }
 };
-
-function initMap() {
-  let losAngeles = { lat: 34.06338, lng: -118.35808 };
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: losAngeles,
-    zoom: 8
-  });
-  infoWindow = new google.maps.InfoWindow();
-  getStores();
-}
 
 const getStores = () => {
   const zipCode = document.getElementById("zip-code").value;
@@ -34,20 +61,16 @@ const getStores = () => {
       }
     })
     .then((data) => {
-      clearLocations();
-      searchLocationsNear(data);
-      setStoresList(data);
-      setOnClickListener();
+      if (data.length > 0) {
+        clearLocations();
+        searchLocationsNear(data);
+        setStoresList(data);
+        setOnClickListener();
+      } else {
+        clearLocations();
+        noStoresFound();
+      }
     });
-};
-
-const setOnClickListener = () => {
-  let storeElements = document.querySelectorAll(".store-container");
-  storeElements.forEach((elem, index) => {
-    elem.addEventListener("click", () => {
-      google.maps.event.trigger(markers[index], "click");
-    });
-  });
 };
 
 const setStoresList = (stores) => {
@@ -76,14 +99,6 @@ const setStoresList = (stores) => {
   });
 
   document.querySelector(".stores-list").innerHTML = storesHtml;
-};
-
-const clearLocations = () => {
-  infoWindow.close();
-  for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(null);
-  }
-  markers.length = 0;
 };
 
 const searchLocationsNear = (stores) => {

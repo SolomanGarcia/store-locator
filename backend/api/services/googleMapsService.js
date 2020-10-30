@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const googleMapsURL = "https://maps.googleapis.com/maps/api/geocode/json";
 
-class googleMaps {
+class GoogleMaps {
   async getCoordinates(zipCode) {
     let coordinates = [];
     await axios
@@ -27,4 +27,4 @@ class googleMaps {
   }
 }
 
-module.exports = googleMaps;
+module.exports = GoogleMaps;
